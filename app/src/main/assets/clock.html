@@ -1,0 +1,899 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>StandBy</title>
+<style>
+:root {
+  --bg: #000;
+  --glass: rgba(30, 30, 32, 0.78);
+  --glass-border: rgba(255,255,255,0.13);
+  --blue: #0A84FF;
+  --label: rgba(255,255,255,0.93);
+  --secondary: rgba(255,255,255,0.42);
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%; height: 100%; min-height: 100%;
+  background: var(--bg);
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  user-select: none; -webkit-user-select: none;
+  cursor: none; position: relative;
+}
+body.interactive { cursor: default; }
+
+#night-veil {
+  position: fixed; inset: 0;
+  background: radial-gradient(ellipse at center, #2a0a00 0%, #0d0200 100%);
+  opacity: 0; pointer-events: none; z-index: 40;
+  transition: opacity 2.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#stage {
+  position: relative; z-index: 10;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  width: 100%; max-width: 100%; padding: 0 3vw;
+  animation: drift 240s ease-in-out infinite alternate;
+}
+@keyframes drift {
+  0%   { transform: translate(0, 0); }
+  25%  { transform: translate(1.2px, -0.6px); }
+  50%  { transform: translate(-0.8px, 1.0px); }
+  75%  { transform: translate(0.6px, 0.8px); }
+  100% { transform: translate(-1.0px, -0.7px); }
+}
+
+#stage.size-s svg#clock { width: min(56vw, 620px); }
+#stage.size-m svg#clock { width: min(70vw, 780px); }
+#stage.size-l svg#clock { width: min(82vw, 880px); }
+@media (orientation: portrait) {
+  #stage.size-s svg#clock { width: min(70vw, 310px); }
+  #stage.size-m svg#clock { width: min(82vw, 350px); }
+  #stage.size-l svg#clock { width: min(90vw, 380px); }
+}
+
+svg#clock {
+  height: auto; overflow: visible; display: block;
+  filter: drop-shadow(0 26px 52px rgba(0,0,0,0.9));
+  transition: width 0.6s cubic-bezier(0.22,1,0.36,1);
+}
+
+#meta {
+  margin-top: 12px;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  opacity: 0; transform: translateY(8px);
+  transition: opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1);
+  width: 100%;
+}
+#meta.show { opacity: 1; transform: translateY(0); }
+
+#alarm {
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+  opacity: 0; max-height: 0; overflow: hidden;
+  transition: opacity 0.55s cubic-bezier(0.22,1,0.36,1), max-height 0.45s ease, margin 0.45s ease;
+  font-variant-numeric: tabular-nums;
+}
+#alarm.show {
+  opacity: 1; max-height: 28px;
+}
+#alarm .icon { width: 13px; height: 13px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+#alarm .icon svg { width: 13px; height: 13px; display: block; }
+#alarm .time {
+  font-size: clamp(12.5px, 2vw, 16px); font-weight: 500;
+  color: #ff453a; letter-spacing: 0.02em; line-height: 1;
+}
+
+#date {
+  font-size: clamp(12.5px, 2.1vw, 17px); font-weight: 500;
+  letter-spacing: 0.035em; color: rgba(255,255,255,0.32);
+  text-align: center; line-height: 1.2;
+  opacity: 0; max-height: 0; overflow: hidden;
+  transition: opacity 0.55s cubic-bezier(0.22,1,0.36,1), max-height 0.45s ease;
+}
+#date.show { opacity: 1; max-height: 32px; }
+
+.solar-digit { mix-blend-mode: screen; }
+.dot { mix-blend-mode: screen; opacity: 0.9; }
+
+.digit-rise {
+  animation: riseIn 0.52s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes riseIn {
+  0%   { opacity: 0; transform: translateY(12px) scale(0.97); }
+  70%  { opacity: 1; }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Button – phone only visible in preview; always for TV remote path via OK */
+#btn {
+  position: fixed;
+  top: max(16px, env(safe-area-inset-top));
+  right: max(16px, env(safe-area-inset-right));
+  width: 42px; height: 42px; border-radius: 50%;
+  border: 1px solid var(--glass-border);
+  background: var(--glass);
+  backdrop-filter: blur(50px) saturate(180%);
+  -webkit-backdrop-filter: blur(50px) saturate(180%);
+  display: none; align-items: center; justify-content: center;
+  z-index: 300; opacity: 0.55;
+  transition: opacity 0.35s, background 0.35s, border-color 0.35s, transform 0.35s cubic-bezier(0.22,1,0.36,1);
+  cursor: pointer;
+}
+body.preview #btn { display: flex; }
+#btn:hover, #btn.open { opacity: 1; }
+#btn.open {
+  background: rgba(10,132,255,0.35);
+  border-color: rgba(10,132,255,0.7);
+  transform: rotate(45deg);
+}
+#btn svg { width: 18px; height: 18px; stroke: #fff; fill: none; stroke-width: 1.9; stroke-linecap: round; }
+
+#sheet {
+  position: fixed;
+  top: max(68px, calc(env(safe-area-inset-top) + 52px));
+  right: max(14px, env(safe-area-inset-right));
+  width: min(300px, 86vw);
+  max-height: min(74vh, 520px);
+  background: var(--glass);
+  backdrop-filter: blur(80px) saturate(200%);
+  -webkit-backdrop-filter: blur(80px) saturate(200%);
+  border-radius: 20px;
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 25px 50px rgba(0,0,0,0.55), inset 0 0.5px 0 rgba(255,255,255,0.12);
+  z-index: 250;
+  opacity: 0; visibility: hidden;
+  transform: scale(0.94) translateY(-8px);
+  pointer-events: none;
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+#sheet.open {
+  opacity: 1; visibility: visible;
+  transform: scale(1) translateY(0);
+  pointer-events: auto;
+}
+
+.segmented {
+  display: flex; margin: 12px 12px 0; padding: 3px;
+  background: rgba(0,0,0,0.35); border-radius: 11px; flex-shrink: 0;
+}
+.segmented button {
+  flex: 1; height: 32px; border: none; border-radius: 9px;
+  background: transparent; color: var(--secondary);
+  font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.25s ease;
+}
+.segmented button.active {
+  background: rgba(255,255,255,0.16); color: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+.pane {
+  display: none; flex: 1; overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 8px 14px 18px; overscroll-behavior: contain;
+}
+.pane.active { display: block; }
+.pane::-webkit-scrollbar { width: 0; height: 0; }
+
+.row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 2px; border-bottom: 1px solid rgba(255,255,255,0.055);
+}
+.row:last-child { border-bottom: none; }
+.row-label { font-size: 15px; font-weight: 500; color: var(--label); }
+
+.pills {
+  display: flex; gap: 4px; background: rgba(0,0,0,0.28);
+  padding: 3px; border-radius: 9px;
+}
+.pill {
+  height: 28px; min-width: 36px; padding: 0 10px; border: none; border-radius: 7px;
+  background: transparent; color: var(--secondary);
+  font-size: 12.5px; font-weight: 600; cursor: pointer; transition: all 0.2s ease;
+}
+.pill.on { background: var(--blue); color: #fff; }
+
+#colors-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+  padding: 14px 6px 10px;
+}
+.swatch {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  background: transparent;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.swatch::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 30% 28%, rgba(255,255,255,0.55), transparent 42%),
+    conic-gradient(from 210deg, var(--c1), var(--c2), var(--c3), var(--c4), var(--c1));
+  box-shadow:
+    inset 0 0.5px 1px rgba(255,255,255,0.35),
+    0 4px 12px rgba(0,0,0,0.35);
+}
+.swatch::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  transition: border-color 0.25s ease, transform 0.25s ease;
+}
+.swatch:hover { transform: scale(1.08); }
+.swatch:active { transform: scale(0.96); }
+.swatch.on::after {
+  border-color: rgba(255,255,255,0.92);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.2);
+}
+
+/* First-run welcome */
+#welcome {
+  position: fixed; inset: 0; z-index: 400;
+  display: none; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.72);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  opacity: 0; transition: opacity 0.5s ease;
+}
+#welcome.show { display: flex; opacity: 1; }
+#welcome .card {
+  width: min(320px, 88vw);
+  background: rgba(28,28,30,0.92);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 22px;
+  padding: 28px 24px 22px;
+  text-align: center;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+  transform: translateY(12px) scale(0.96);
+  transition: transform 0.5s cubic-bezier(0.22,1,0.36,1);
+}
+#welcome.show .card { transform: translateY(0) scale(1); }
+#welcome h1 {
+  font-size: 22px; font-weight: 600; color: #fff; margin-bottom: 10px;
+}
+#welcome p {
+  font-size: 15px; line-height: 1.45; color: rgba(255,255,255,0.55); margin-bottom: 22px;
+}
+#welcome .cta {
+  width: 100%; height: 44px; border: none; border-radius: 12px;
+  background: var(--blue); color: #fff; font-size: 16px; font-weight: 600;
+  cursor: pointer;
+}
+
+#hint {
+  position: fixed;
+  bottom: max(24px, env(safe-area-inset-bottom));
+  left: 50%; transform: translateX(-50%);
+  background: rgba(30,30,32,0.82); backdrop-filter: blur(30px);
+  color: rgba(255,255,255,0.7); font-size: 13px; font-weight: 500;
+  padding: 10px 18px; border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.1);
+  opacity: 0; visibility: hidden; transition: opacity 0.5s;
+  z-index: 100; pointer-events: none;
+}
+#hint.show { opacity: 1; visibility: visible; }
+
+/* TV: slightly larger touch targets already via remote; phone: denser sheet */
+body.is-tv #sheet { width: min(340px, 86vw); }
+body.is-phone #btn { opacity: 0.7; }
+</style>
+</head>
+<body>
+<div id="night-veil"></div>
+
+<div id="stage" class="size-m">
+  <svg id="clock" role="img" aria-label="StandBy Clock"></svg>
+  <div id="meta">
+    <div id="alarm">
+      <span class="icon">
+        <svg viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="13" r="7" fill="#ff453a"/>
+          <path d="M12 13V9.5" stroke="#1a0000" stroke-width="1.7" stroke-linecap="round"/>
+          <path d="M12 13l2.8 1.9" stroke="#1a0000" stroke-width="1.7" stroke-linecap="round"/>
+          <path d="M5.2 5.2l2 2M18.8 5.2l-2 2" stroke="#ff453a" stroke-width="1.9" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <span class="time" id="alarm-text"></span>
+    </div>
+    <div id="date"></div>
+  </div>
+</div>
+
+<button id="btn" aria-label="Options">
+  <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+</button>
+
+<div id="sheet">
+  <div class="segmented">
+    <button class="active" data-pane="settings">Settings</button>
+    <button data-pane="colors">Colors</button>
+  </div>
+  <div id="pane-settings" class="pane active"></div>
+  <div id="pane-colors" class="pane"><div id="colors-grid"></div></div>
+</div>
+
+<div id="welcome">
+  <div class="card">
+    <h1>StandBy</h1>
+    <p>Tap <strong>+</strong> to change colors, style, and more.<br>On TV, press OK on your remote.</p>
+    <button class="cta" id="welcome-ok">Continue</button>
+  </div>
+</div>
+
+<div id="hint">Tap + to customize</div>
+
+<script>
+const KX = 1.37, GAP = -14, COLON_DOT = 6, COLON_ADV = 8;
+/* Tight fixed cell (~avg digit). Wide glyphs slightly overlap neighbors like original Solar */
+const SLOT = 68;
+
+const PATHS = [
+  "M 63.99 50.00 C 63.99 72.78 52.35 91.25 37.99 91.25 C 23.63 91.25 11.99 72.78 11.99 50.00 C 11.99 27.22 23.63 8.75 37.99 8.75 C 52.35 8.75 63.99 27.22 63.99 50.00 Z",
+  "M 11.99 26.00 L 34.99 8.75 L 34.99 91.25",
+  "M 11.99 30.00 C 11.99 17.00 21.99 8.75 34.99 8.75 C 48.99 8.75 57.99 17.00 57.99 28.00 C 57.99 40.00 49.99 50.00 37.99 60.00 L 19.99 79.00 L 13.99 91.25 L 57.99 91.25",
+  "M 12.99 28.00 C 14.99 17.00 23.99 8.75 35.99 8.75 C 49.99 8.75 57.99 16.00 57.99 27.00 C 57.99 38.00 48.99 45.00 36.99 45.00 C 50.99 45.00 59.99 53.00 59.99 66.00 C 59.99 80.00 49.99 91.25 34.99 91.25 C 22.99 91.25 14.99 85.00 11.99 75.00",
+  "M 10.28 74.00 L 53.98 7.50 L 53.98 92.50 M 10.28 74.00 L 65.48 74.00",
+  "M 55.99 8.75 L 23.99 8.75 L 18.99 44.00 C 23.99 40.00 30.99 38.00 38.99 38.00 C 52.99 38.00 60.99 49.00 60.99 64.00 C 60.99 79.00 50.99 91.25 34.99 91.25 C 22.99 91.25 14.99 85.00 11.99 76.00",
+  "M 11.99 66.25 C 11.99 52.00 21.99 41.25 35.99 41.25 C 49.99 41.25 59.99 52.00 59.99 66.25 C 59.99 80.00 49.99 91.25 35.99 91.25 C 21.99 91.25 11.99 80.00 11.99 66.25 C 11.99 34.00 25.99 8.75 53.99 8.75",
+  "M 11.99 8.75 L 55.99 8.75 C 47.99 30.00 37.99 60.00 31.99 91.25",
+  "M 56.49 27.00 C 56.49 37.08 47.31 45.25 35.99 45.25 C 24.67 45.25 15.49 37.08 15.49 27.00 C 15.49 16.92 24.67 8.75 35.99 8.75 C 47.31 8.75 56.49 16.92 56.49 27.00 Z M 59.99 67.50 C 59.99 80.62 49.24 91.25 35.99 91.25 C 22.73 91.25 11.99 80.62 11.99 67.50 C 11.99 54.38 22.73 43.75 35.99 43.75 C 49.24 43.75 59.99 54.38 59.99 67.50 Z",
+  "M 60.99 33.50 C 60.99 62.00 55.99 91.25 36.99 91.25 C 23.99 91.25 14.99 85.00 11.99 76.00 M 60.99 33.50 C 60.99 47.17 50.02 58.25 36.49 58.25 C 22.96 58.25 11.99 47.17 11.99 33.50 C 11.99 19.83 22.96 8.75 36.49 8.75 C 50.02 8.75 60.99 19.83 60.99 33.50 Z"
+];
+const INK = [75.98,46.98,69.97,71.97,75.75,72.97,71.97,67.97,71.97,72.97];
+const STROKE = [17.5,17.5,17.5,17.5,15,17.5,17.5,17.5,17.5,17.5];
+
+/* Solar-style gradients — bright + deep for screen blend */
+const PALETTES = [
+  {n:'Solar Blue',  t:['#5AC8FF','#0077ED','#64D2FF','#0A84FF']},
+  {n:'Indigo',      t:['#7D7AFF','#3634A3','#5E5CE6','#5856D6']},
+  {n:'Purple',      t:['#E255FF','#8944AB','#BF5AF2','#9B59B6']},
+  {n:'Pink',        t:['#FF6B9D','#D30F45','#FF375F','#FF2D55']},
+  {n:'Orange',      t:['#FFB340','#C93400','#FF9F0A','#FF6B00']},
+  {n:'Yellow',      t:['#FFE14D','#B88A00','#FFD60A','#F5C518']},
+  {n:'Green',       t:['#66F070','#0B7A3B','#30D158','#34C759']},
+  {n:'Teal',        t:['#6AE4FF','#0088A3','#40C8E0','#64D2FF']},
+  {n:'Red',         t:['#FF6961','#C41E1E','#FF453A','#FF3B30']},
+  {n:'Silver',      t:['#FFFFFF','#8E8E93','#E5E5EA','#AEAEB2']}
+];
+
+const TILT_SOLAR = [{r:-3.2,y:1.2},{r:1.8,y:-1.8},{r:-3.8,y:2.2},{r:3.4,y:-0.8}];
+
+const params = new URLSearchParams(location.search);
+const isPreview = params.get('mode') !== 'dream';
+if (isPreview) document.body.classList.add('preview');
+else document.body.classList.add('dream');
+
+/* Phone vs TV heuristic */
+const isTV = /TV|Android TV|BRAVIA|AFT|GoogleTV/i.test(navigator.userAgent)
+  || (window.innerWidth >= 960 && !('ontouchstart' in window));
+document.body.classList.add(isTV ? 'is-tv' : 'is-phone');
+
+const Native = window.StandbyNative || null;
+function nativeIs24h() { try { return Native ? Native.is24Hour() : true; } catch(e) { return true; } }
+function nativeLux() { try { return Native ? Native.getLux() : 100; } catch(e) { return 100; } }
+function nativeAlarm() { try { return Native ? (Native.getNextAlarm() || '') : ''; } catch(e) { return ''; } }
+
+function saveBool(k,v){ try{if(Native)Native.saveBool(k,v);}catch(e){} try{localStorage.setItem(k,v?'1':'0');}catch(e){} }
+function getBool(k,d){ try{if(Native)return Native.getBool(k,d);}catch(e){} try{const v=localStorage.getItem(k);if(v===null)return d;return v==='1';}catch(e){return d;} }
+function saveStr(k,v){ try{if(Native)Native.saveSetting(k,v);}catch(e){} try{localStorage.setItem(k,v);}catch(e){} }
+function getStr(k,d){
+  try {
+    if (Native) {
+      const v = Native.getSetting(k, d);
+      if (v !== null && v !== undefined) return v;
+    }
+  } catch(e) {}
+  try {
+    const v = localStorage.getItem(k);
+    return v !== null ? v : d;
+  } catch(e) { return d; }
+}
+function hapticTick(){ try { if (Native && Native.hapticTick) Native.hapticTick(); } catch(e) {} }
+function hapticClick(){ try { if (Native && Native.hapticClick) Native.hapticClick(); } catch(e) {} }
+function saveInt(k,v){ try{if(Native)Native.saveInt(k,v);}catch(e){} try{localStorage.setItem(k,String(v));}catch(e){} }
+function getInt(k,d){ try{if(Native)return Native.getInt(k,d);}catch(e){} try{const v=parseInt(localStorage.getItem(k),10);return isNaN(v)?d:v;}catch(e){return d;} }
+
+/* Settings: style, 12/24 restored */
+let S = {
+  seconds: getBool('sb_seconds', false),
+  date: getBool('sb_date', true),
+  alarm: getBool('sb_alarm', true),
+  night: getBool('sb_night', true),
+  auto: getBool('sb_auto', false),
+  size: getStr('sb_size', 'm'),
+  hour12: getStr('sb_hour12', 'auto')   // auto | 24 | 12
+};
+if (!['s','m','l'].includes(S.size)) S.size = 'm';
+if (!['auto','24','12'].includes(S.hour12)) S.hour12 = 'auto';
+
+let paletteIdx = getInt('sb_pal', 0);
+if (paletteIdx < 0 || paletteIdx >= PALETTES.length) paletteIdx = 0;
+
+function persist() {
+  saveBool('sb_seconds', S.seconds);
+  saveBool('sb_date', S.date);
+  saveBool('sb_alarm', S.alarm);
+  saveBool('sb_night', S.night);
+  saveBool('sb_auto', S.auto);
+  saveStr('sb_size', S.size);
+  saveStr('sb_hour12', S.hour12);
+  saveInt('sb_pal', paletteIdx);
+}
+
+function use24hNow() {
+  if (S.hour12 === '24') return true;
+  if (S.hour12 === '12') return false;
+  return nativeIs24h();
+}
+
+function applyNight() {
+  const veil = document.getElementById('night-veil');
+  if (!S.night) { veil.style.opacity = '0'; return; }
+  let intensity = 0;
+  const lux = nativeLux();
+  if (lux < 5) intensity = 0.55;
+  else if (lux < 15) intensity = 0.48;
+  else if (lux < 40) intensity = 0.28;
+  else if (lux < 80) intensity = 0.12;
+  else {
+    const h = new Date().getHours();
+    if (h >= 22 || h < 5) intensity = 0.48;
+    else if (h >= 20 || h < 7) intensity = 0.32;
+  }
+  veil.style.opacity = intensity;
+}
+
+function updateAlarm() {
+  const alarmEl = document.getElementById('alarm');
+  const text = document.getElementById('alarm-text');
+  const next = S.alarm ? nativeAlarm() : '';
+  if (next) {
+    text.textContent = next;
+    alarmEl.classList.add('show');
+  } else {
+    alarmEl.classList.remove('show');
+  }
+  refreshMeta();
+}
+
+function updateDate() {
+  const dateEl = document.getElementById('date');
+  if (S.date) {
+    const d = new Date();
+    dateEl.textContent = d.toLocaleDateString(undefined, {
+      weekday: 'long', month: 'long', day: 'numeric'
+    });
+    dateEl.classList.add('show');
+  } else {
+    dateEl.classList.remove('show');
+  }
+  updateAlarm();
+}
+
+function refreshMeta() {
+  const hasAlarm = document.getElementById('alarm').classList.contains('show');
+  meta.classList.toggle('show', S.date || hasAlarm);
+}
+
+const btn = document.getElementById('btn');
+const sheet = document.getElementById('sheet');
+const stage = document.getElementById('stage');
+const meta = document.getElementById('meta');
+const hint = document.getElementById('hint');
+const welcome = document.getElementById('welcome');
+let open = false;
+
+function toggleSheet() {
+  if (!isPreview) return;
+  open = !open;
+  btn.classList.toggle('open', open);
+  sheet.classList.toggle('open', open);
+  document.body.classList.toggle('interactive', open);
+  hapticClick();
+  if (open) hideHint();
+}
+
+btn.addEventListener('click', e => { e.stopPropagation(); toggleSheet(); });
+document.addEventListener('click', e => {
+  if (!open) return;
+  if (e.target.closest('#sheet') || e.target.closest('#btn')) return;
+  toggleSheet();
+});
+
+document.querySelectorAll('.segmented button').forEach(b => {
+  b.addEventListener('click', e => {
+    e.stopPropagation();
+    document.querySelectorAll('.segmented button').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
+    document.getElementById('pane-' + b.dataset.pane).classList.add('active');
+  });
+});
+
+function buildSettings() {
+  const el = document.getElementById('pane-settings');
+  el.innerHTML = `
+    <div class="row"><span class="row-label">Seconds</span>
+      <div class="pills">
+        <button class="pill ${S.seconds?'on':''}" data-k="seconds" data-v="1">On</button>
+        <button class="pill ${!S.seconds?'on':''}" data-k="seconds" data-v="0">Off</button>
+      </div>
+    </div>
+    <div class="row"><span class="row-label">Time Format</span>
+      <div class="pills">
+        <button class="pill ${S.hour12==='auto'?'on':''}" data-k="hour12" data-v="auto">Auto</button>
+        <button class="pill ${S.hour12==='24'?'on':''}" data-k="hour12" data-v="24">24h</button>
+        <button class="pill ${S.hour12==='12'?'on':''}" data-k="hour12" data-v="12">12h</button>
+      </div>
+    </div>
+    <div class="row"><span class="row-label">Date</span>
+      <div class="pills">
+        <button class="pill ${S.date?'on':''}" data-k="date" data-v="1">On</button>
+        <button class="pill ${!S.date?'on':''}" data-k="date" data-v="0">Off</button>
+      </div>
+    </div>
+    <div class="row"><span class="row-label">Alarm</span>
+      <div class="pills">
+        <button class="pill ${S.alarm?'on':''}" data-k="alarm" data-v="1">On</button>
+        <button class="pill ${!S.alarm?'on':''}" data-k="alarm" data-v="0">Off</button>
+      </div>
+    </div>
+    <div class="row"><span class="row-label">Night Mode</span>
+      <div class="pills">
+        <button class="pill ${S.night?'on':''}" data-k="night" data-v="1">On</button>
+        <button class="pill ${!S.night?'on':''}" data-k="night" data-v="0">Off</button>
+      </div>
+    </div>
+    <div class="row"><span class="row-label">Auto Color</span>
+      <div class="pills">
+        <button class="pill ${S.auto?'on':''}" data-k="auto" data-v="1">On</button>
+        <button class="pill ${!S.auto?'on':''}" data-k="auto" data-v="0">Off</button>
+      </div>
+    </div>
+    <div class="row"><span class="row-label">Size</span>
+      <div class="pills">
+        <button class="pill ${S.size==='s'?'on':''}" data-k="size" data-v="s">S</button>
+        <button class="pill ${S.size==='m'?'on':''}" data-k="size" data-v="m">M</button>
+        <button class="pill ${S.size==='l'?'on':''}" data-k="size" data-v="l">L</button>
+      </div>
+    </div>
+  `;
+  el.querySelectorAll('.pill').forEach(p => {
+    p.addEventListener('click', e => {
+      e.stopPropagation();
+      const k = p.dataset.k, v = p.dataset.v;
+      if (k==='seconds') S.seconds = v==='1';
+      if (k==='hour12') S.hour12 = v;
+      if (k==='date') S.date = v==='1';
+      if (k==='alarm') S.alarm = v==='1';
+      if (k==='night') S.night = v==='1';
+      if (k==='auto') S.auto = v==='1';
+      if (k==='size') S.size = v;
+      persist();
+      apply();
+      buildSettings();
+      hapticTick();
+    });
+  });
+}
+
+const grid = document.getElementById('colors-grid');
+PALETTES.forEach((p,i) => {
+  const b = document.createElement('button');
+  b.className = `swatch ${i===paletteIdx?'on':''}`;
+  b.style.setProperty('--c1', p.t[0]);
+  b.style.setProperty('--c2', p.t[1]);
+  b.style.setProperty('--c3', p.t[2]);
+  b.style.setProperty('--c4', p.t[3]);
+  b.title = p.n;
+  b.setAttribute('aria-label', p.n);
+  b.addEventListener('click', e => {
+    e.stopPropagation();
+    if (paletteIdx === i) return;
+    paletteIdx = i;
+    persist();
+    document.querySelectorAll('.swatch').forEach((s,j) => s.classList.toggle('on', j===i));
+    applyPaletteInPlace();
+    hapticTick();
+  });
+  grid.appendChild(b);
+});
+
+function apply() {
+  stage.className = 'size-' + S.size;
+  applyNight();
+  forceRebuild = true;
+  render(true);
+}
+
+/* First-run */
+function showWelcome() {
+  if (!isPreview) return;
+  if (getBool('sb_welcome_seen', false)) {
+    showHint();
+    return;
+  }
+  welcome.classList.add('show');
+  document.body.classList.add('interactive');
+}
+function hideWelcome() {
+  welcome.classList.remove('show');
+  saveBool('sb_welcome_seen', true);
+  document.body.classList.remove('interactive');
+  showHint();
+}
+document.getElementById('welcome-ok').addEventListener('click', e => {
+  e.stopPropagation();
+  hideWelcome();
+});
+
+function showHint() {
+  if (!isPreview) return;
+  if (getBool('sb_hint_seen', false)) return;
+  setTimeout(() => {
+    hint.classList.add('show');
+    setTimeout(hideHint, 4000);
+  }, 900);
+}
+function hideHint() {
+  hint.classList.remove('show');
+  saveBool('sb_hint_seen', true);
+}
+
+window.addEventListener('keydown', e => {
+  if (!isPreview) return;
+  if (['ArrowRight','ArrowDown','DPAD_RIGHT','DPAD_DOWN'].includes(e.key)) {
+    e.preventDefault();
+    if (open) {
+      paletteIdx = (paletteIdx + 1) % PALETTES.length;
+      persist();
+      document.querySelectorAll('.swatch').forEach((s,j) => s.classList.toggle('on', j===paletteIdx));
+      applyPaletteInPlace();
+      hapticTick();
+    }
+  } else if (['ArrowLeft','ArrowUp','DPAD_LEFT','DPAD_UP'].includes(e.key)) {
+    e.preventDefault();
+    if (open) {
+      paletteIdx = (paletteIdx - 1 + PALETTES.length) % PALETTES.length;
+      persist();
+      document.querySelectorAll('.swatch').forEach((s,j) => s.classList.toggle('on', j===paletteIdx));
+      applyPaletteInPlace();
+      hapticTick();
+    }
+  } else if (['Enter','OK','Select'].includes(e.key)) {
+    e.preventDefault();
+    if (welcome.classList.contains('show')) hideWelcome();
+    else toggleSheet();
+  } else if (['Back','Escape','Backspace'].includes(e.key) && open) {
+    e.preventDefault(); toggleSheet();
+  }
+});
+
+/* Clock engine */
+function squeeze(path, kx) {
+  const tokens = path.match(/[MLCZ]|-?\d+(?:\.\d+)?/g);
+  let n = 0;
+  return tokens.map(t => {
+    if (/^[MLCZ]$/.test(t)) { n = 0; return t; }
+    const r = n % 2 === 0 ? (Number(t) / kx).toFixed(3) : t;
+    n++; return r;
+  }).join(' ');
+}
+
+/**
+ * Fixed cells (SLOT wide, GAP overlap like original).
+ * Total width depends only on string *structure* (HH:MM vs HH:MM:SS),
+ * never on which digits are shown — clock frame stays still.
+ */
+function layout(text) {
+  const xs = [];
+  let x = 0;
+  for (const ch of text) {
+    if (ch === ':') {
+      xs.push(x + COLON_DOT - GAP);
+      x += COLON_ADV - GAP;
+      continue;
+    }
+    const d = Number(ch);
+    // center glyph in fixed cell
+    xs.push(x + (SLOT - INK[d]) / 2);
+    x += SLOT + GAP;
+  }
+  return { xs, width: x - GAP };
+}
+
+function timeStr() {
+  if (params.get('t')) return params.get('t');
+  const d = new Date();
+  let h = d.getHours();
+  const m = String(d.getMinutes()).padStart(2, '0');
+  const s = String(d.getSeconds()).padStart(2, '0');
+  if (!use24hNow()) h = h % 12 || 12;
+  const hh = String(h).padStart(2, '0');
+  return S.seconds ? `${hh}:${m}:${s}` : `${hh}:${m}`;
+}
+
+const svg = document.getElementById('clock');
+let shown = '';
+let lastHour = -1;
+let forceRebuild = true;
+let digitNodes = []; // { node, path, char, di, cellX }
+
+function digitTransform(d, x, di, tilt) {
+  const t = tilt[di % 4];
+  const cx = x + INK[d] / 2;
+  return {
+    outer: `translate(${cx.toFixed(2)} 50) rotate(${t.r}) translate(-${cx.toFixed(2)} -${(50 + t.y).toFixed(2)})`,
+    inner: `translate(${x.toFixed(2)} 0) scale(${KX} 1)`
+  };
+}
+
+function createDigitGroup(d, x, color, di, animate, stroke, tilt) {
+  const tr = digitTransform(d, x, di, tilt);
+  const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  g.setAttribute('class', 'solar-digit' + (animate ? ' digit-rise' : ''));
+  g.setAttribute('transform', tr.outer);
+  const inner = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  inner.setAttribute('transform', tr.inner);
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('d', squeeze(PATHS[d], KX));
+  path.setAttribute('fill', 'none');
+  path.setAttribute('stroke', color);
+  path.setAttribute('stroke-width', stroke[d]);
+  path.setAttribute('stroke-linecap', 'round');
+  path.setAttribute('stroke-linejoin', 'round');
+  path.style.transition = 'stroke 0.45s cubic-bezier(0.22, 1, 0.36, 1)';
+  inner.appendChild(path);
+  g.appendChild(inner);
+  return { group: g, path };
+}
+
+function applyPaletteInPlace() {
+  const pal = PALETTES[paletteIdx];
+  digitNodes.forEach((entry) => {
+    if (!entry || !entry.path) return;
+    entry.path.setAttribute('stroke', pal.t[entry.di % 4]);
+  });
+}
+
+function buildFull(text, xs, width, pal, stroke, tilt, dotR) {
+  svg.innerHTML = '';
+  digitNodes = [];
+  let di = 0;
+  let cellX = 0;
+  [...text].forEach((ch, i) => {
+    if (ch === ':') {
+      const top = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      top.setAttribute('class', 'dot');
+      top.setAttribute('cx', xs[i]);
+      top.setAttribute('cy', '26.8');
+      top.setAttribute('r', dotR);
+      top.setAttribute('fill', '#E5E5EA');
+      const bot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      bot.setAttribute('class', 'dot');
+      bot.setAttribute('cx', xs[i]);
+      bot.setAttribute('cy', '71.4');
+      bot.setAttribute('r', dotR);
+      bot.setAttribute('fill', '#E5E5EA');
+      svg.appendChild(top);
+      svg.appendChild(bot);
+      cellX += COLON_ADV - GAP;
+      return;
+    }
+    const d = Number(ch);
+    const drawX = cellX + (SLOT - INK[d]) / 2;
+    const created = createDigitGroup(d, drawX, pal.t[di % 4], di, false, stroke, tilt);
+    svg.appendChild(created.group);
+    digitNodes.push({ node: created.group, path: created.path, char: ch, di, cellX });
+    cellX += SLOT + GAP;
+    di++;
+  });
+  // Lock frame size for this structure (HH:MM or HH:MM:SS)
+  svg.setAttribute('viewBox', `0 0 ${width.toFixed(2)} 100`);
+}
+
+/** Creative fix: only swap the glyph inside its locked cell; never touch colons or frame. */
+function updateDigitsOnly(text, pal, stroke, tilt) {
+  let di = 0;
+  let cellX = 0;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (ch === ':') {
+      cellX += COLON_ADV - GAP;
+      continue;
+    }
+    const d = Number(ch);
+    const entry = digitNodes[di];
+    if (entry && entry.char !== ch) {
+      const drawX = entry.cellX + (SLOT - INK[d]) / 2;
+      const created = createDigitGroup(d, drawX, pal.t[di % 4], di, true, stroke, tilt);
+      svg.replaceChild(created.group, entry.node);
+      digitNodes[di] = {
+        node: created.group,
+        path: created.path,
+        char: ch,
+        di,
+        cellX: entry.cellX
+      };
+    }
+    cellX += SLOT + GAP;
+    di++;
+  }
+}
+
+function render(force = false) {
+  const text = timeStr();
+  if (text === shown && !force && !forceRebuild) return;
+
+  const old = shown;
+  shown = text;
+
+  if (S.auto) {
+    const h = new Date().getHours();
+    if (h !== lastHour) {
+      lastHour = h;
+      paletteIdx = h % PALETTES.length;
+      persist();
+      document.querySelectorAll('.swatch').forEach((s, j) => s.classList.toggle('on', j === paletteIdx));
+      applyPaletteInPlace();
+    }
+  }
+
+  const { xs, width } = layout(text);
+  const pal = PALETTES[paletteIdx];
+  const stroke = STROKE;
+  const tilt = TILT_SOLAR;
+  const dotR = 12.05;
+
+  const structureChanged =
+    forceRebuild || force || !old || old.length !== text.length || digitNodes.length === 0;
+
+  if (structureChanged) {
+    buildFull(text, xs, width, pal, stroke, tilt, dotR);
+    forceRebuild = false;
+  } else {
+    // Same structure → frame + colons frozen; only changed digits swap in-cell
+    updateDigitsOnly(text, pal, stroke, tilt);
+  }
+
+  updateDate();
+  applyNight();
+}
+
+function scheduleClockTick() {
+  const delay = 1000 - (Date.now() % 1000);
+  setTimeout(() => {
+    render(false);
+    scheduleClockTick();
+  }, delay);
+}
+
+buildSettings();
+apply();
+render(true);
+showWelcome();
+scheduleClockTick();
+setInterval(applyNight, 4000);
+setInterval(updateAlarm, 60000);
+
+if (params.get('customize') === 'true') toggleSheet();
+
+</script>
+</body>
+</html>
