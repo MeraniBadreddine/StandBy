@@ -1,66 +1,115 @@
+ <div align="center">
+
 # StandBy
 
-**Time, beautifully still.**
+### Time, beautifully still.
 
-A calm, minimal clock and system screensaver for Android phones and Android TV.
+A quiet, thoughtfully designed clock for Android.
 
-Solar-inspired digits. Ambient night mode. Carefully curated colors. Nothing unnecessary.
+Minimal by design. Beautiful by default.
 
-[**↓ Download StandBy v3.14 (APK)**](https://github.com/MeraniBadreddine/StandBy/raw/refs/heads/main/StandBy-v3.14.apk)
+<br>
 
-*Android 5.0+ · Phones & Android TV · No third-party libraries*
+<a href="https://github.com/MeraniBadreddine/StandBy/raw/refs/heads/main/StandBy-v3.14.apk"><strong>↓ &nbsp; Download StandBy</strong></a>
+
+**Version 3.14** &nbsp; · &nbsp; Android &nbsp; · &nbsp; Free
+
+<br>
+
+</div>
 
 ---
 
-## Overview
+<div align="center">
 
-StandBy transforms your screen into a quiet, beautifully designed clock — whether you're charging your phone, using a dock, or relaxing in front of your TV.
+**TIME, WITHOUT THE NOISE.**
 
-## Features
+</div>
 
-| Feature | Description |
-|---|---|
-| **Solar clock** | Custom SVG digits with smooth, precise transitions |
-| **Ambient night mode** | Responds to the light sensor, with a time-based fallback |
-| **Next alarm** | Displays your system's next scheduled alarm |
-| **Flexible date & time** | Optional date, automatic or manual 12/24-hour format |
-| **Curated colors** | 10 palettes with optional hourly color rotation |
-| **Adjustable sizing** | Small, medium, and large |
-| **Subtle haptics** | Light feedback when changing colors or settings |
-| **OLED care** | Very slow pixel drift |
-| **Native screensaver** | Android DreamService integration without customization controls |
+StandBy turns your Android screen into a calm, always-ready clock. Designed for your desk, your bedside, your charging stand, or your TV.
 
-## Download & setup
+No clutter. No unnecessary controls. Just time, presented with care.
 
-### 1. Install
+## The experience
 
-Download the APK using the link above and install it on your Android device. If prompted, allow installation from your chosen source.
+### A clock with room to breathe
 
-### 2. Customize
+Custom solar-inspired digits, carefully tuned spacing, and subtle transitions create a display that feels considered rather than busy.
 
-Open **StandBy**, then tap **+** or press **OK** on your TV remote to access settings and colors.
+### Light sets the mood
 
-### 3. Enable the system screensaver
+Ambient-light-aware night mode helps the clock adapt to its surroundings, with a time-based fallback when a light sensor is unavailable.
 
-Open your device's **Settings → Display → Screen saver**, select **StandBy**, and choose when it should start. Available options depend on your device.
+### Your screen, your way
 
-**Recommended:** Landscape orientation while charging or docked.
+Choose from curated color palettes, adjust the clock size, switch between 12-hour and 24-hour time, and decide what information appears.
 
-## Settings
+### More than a preview
 
-| Option | Available values |
-|---|---|
-| Seconds | On / Off |
-| Time format | System / 24-hour / 12-hour |
-| Date | On / Off |
-| Alarm | On / Off |
-| Night mode | On / Off |
-| Automatic colors | On / Off |
-| Clock size | Small / Medium / Large |
+StandBy integrates with Android's native screensaver system, so the clock can run without its customization controls.
 
-Settings are stored locally using native Android preferences, with a WebView local-storage fallback.
+---
 
-## Build from source
+## Made for everyday moments
+
+| Detail | Experience |
+|:--|:--|
+| Clock | Custom SVG digits |
+| Night mode | Ambient light sensor or time fallback |
+| Color | 10 curated palettes |
+| Time | System, 12-hour or 24-hour |
+| Display | Small, medium or large |
+| Personalization | Date, seconds and alarm visibility |
+| Screen protection | Very slow pixel drift |
+| Feedback | Subtle haptics on supported phones |
+| Screensaver | Native Android DreamService |
+
+## Get started
+
+**01 — Install**
+
+Download the APK using the button at the top of this page. If Android asks for permission to install apps from your chosen source, review and allow it as appropriate.
+
+**02 — Make it yours**
+
+Open StandBy and tap **+**, or press **OK** on your TV remote, to access the available settings and colors.
+
+**03 — Set it as your screensaver**
+
+Open your Android device's **Settings → Display → Screen saver**, select StandBy, and choose when the screensaver should start. The available options depend on your device.
+
+*Tip: Landscape orientation while charging or docked makes a great bedside setup.*
+
+---
+
+## Thoughtful by default
+
+- The clock should look right without configuration.
+- Every setting should have a clear purpose.
+- The screensaver should remain free of customization controls.
+- Digit positions stay fixed while changing glyphs animate.
+- OLED pixel drift remains extremely subtle.
+
+## For developers
+
+StandBy uses a lightweight Android architecture with a WebView-based clock interface and a native bridge.
+
+```text
+PreviewActivity
+└── Clock preview and customization
+
+StandbyDreamService
+└── Native Android screensaver
+
+StandbyBridge
+└── Sensors, alarms, time format,
+    haptics and preferences
+
+assets/clock.html
+└── Clock interface and rendering
+```
+
+### Build locally
 
 Requirements: Android SDK and a compatible Java development environment.
 
@@ -68,48 +117,27 @@ Requirements: Android SDK and a compatible Java development environment.
 ./gradlew assembleDebug
 ```
 
-Generated APK:
+The generated APK is located at:
 
 ```text
 app/build/outputs/apk/debug/app-debug.apk
 ```
 
-## Architecture
-
-```text
-PreviewActivity
-└── Customizable clock interface
-
-StandbyDreamService
-└── Native Android screensaver
-
-StandbyBridge
-└── Light sensor, time format, alarms,
-    haptics and preferences
-
-assets/clock.html
-└── Clock interface and rendering engine
-```
-
-## Design principles
-
-- Beautiful defaults, with no setup required.
-- Minimal controls, each with a clear purpose.
-- No customization controls inside the screensaver.
-- Stable digit frames, with only changing glyphs animated.
-- A quiet interface designed to stay out of the way.
-
-## Technical details
-
-| Property | Value |
-|---|---|
+| Technical detail | Value |
+|:--|:--|
 | Version | 3.14 |
-| Minimum Android version | Android 5.0 (API 21) |
+| Minimum Android | 5.0 · API 21 |
 | Target SDK | 35 |
-| Dependencies | No third-party libraries |
+| Third-party libraries | None |
 
 ---
 
-*StandBy is an independent project and is not affiliated with or endorsed by Apple Inc.*
+<div align="center">
 
-**StandBy · A little more calm on your screen.**
+**Less interface. More atmosphere.**
+
+StandBy · Version 3.14
+
+<sub>An independent project. Not affiliated with or endorsed by Apple Inc.</sub>
+
+</div>
