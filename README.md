@@ -3,7 +3,7 @@
 # StandBy
 ### Time, elevated.
 
-A calm, beautifully considered ambient clock experience for Android phones.
+A calm, beautifully considered ambient clock experience for Android phones.  
 Simplicity by design. Perfection by detail.
 
 <br>
@@ -100,3 +100,42 @@ StandbyBridge
 
 assets/clock.html
 └── Clock rendering, animations, themes and settings
+```
+
+---
+
+## Build from Source
+
+```bash
+git clone https://github.com/MeraniBadreddine/StandBy.git
+cd StandBy
+gradle assembleDebug
+```
+
+**Built APK location:**  
+`app/build/outputs/apk/debug/app-debug.apk`
+
+---
+
+## Environment Specification
+
+| Parameter | Value |
+| :--- | :--- |
+| **Version** | 4.0 |
+| **Version Code** | 36+ |
+| **Minimum Android** | Android 7.0 (API Level 24) |
+| **Compile SDK** | API Level 35 |
+| **Target SDK** | API Level 35 |
+| **Java Compatibility** | Java 11 |
+| **Dependencies** | No third-party libraries |
+
+---
+
+<div align="center">
+
+### Less interface. More atmosphere.
+
+**StandBy · Phone Edition · Version 4.0**  
+<sub>An independent open-source project. Not affiliated with or endorsed by Apple Inc.</sub>
+
+</div>
