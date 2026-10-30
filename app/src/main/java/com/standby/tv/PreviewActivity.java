@@ -12,6 +12,7 @@ import android.webkit.WebViewClient;
 
 /**
  * Preview / Customize mode. Options button is visible.
+ * FIX: sensor lifecycle tied to activity lifecycle — no background drain.
  */
 public final class PreviewActivity extends Activity {
 
@@ -39,6 +40,7 @@ public final class PreviewActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        if (bridge != null) bridge.resume();
         if (webView != null) {
             webView.onResume();
             webView.resumeTimers();
@@ -47,6 +49,7 @@ public final class PreviewActivity extends Activity {
 
     @Override
     protected void onPause() {
+        if (bridge != null) bridge.pause(); // stop the light sensor now
         if (webView != null) {
             webView.onPause();
             webView.pauseTimers();
@@ -135,7 +138,7 @@ public final class PreviewActivity extends Activity {
 
         String url = "file:///android_asset/clock.html?mode="
                 + (interactive ? "preview" : "dream")
-                + "&v=33";
+                + "&v=34";
         web.loadUrl(url);
         return web;
     }

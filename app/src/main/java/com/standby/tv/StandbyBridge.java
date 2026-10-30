@@ -16,7 +16,9 @@ import android.app.AlarmManager;
 import android.app.AlarmManager.AlarmClockInfo;
 
 /**
- * Native bridge: sensors, system format, alarm, haptics, persistent settings.
+ * Native bridge: light sensor, system format, next alarm, haptics, settings.
+ * FIX: the sensor listener is now registered/unregistered with the window
+ * lifecycle (pause()/resume()) so it never runs in the background.
  */
 public final class StandbyBridge implements SensorEventListener {
 
@@ -26,6 +28,7 @@ public final class StandbyBridge implements SensorEventListener {
     private final SharedPreferences prefs;
     private final SensorManager sensorManager;
     private Sensor lightSensor;
+    private boolean sensorRegistered = false;
     private float lastLux = 100f;
 
     public StandbyBridge(Context context) {
@@ -34,16 +37,28 @@ public final class StandbyBridge implements SensorEventListener {
         this.sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         if (sensorManager != null) {
             lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
-            if (lightSensor != null) {
-                sensorManager.registerListener(this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
-            }
+        }
+        resume(); // register on creation (window is about to be visible)
+    }
+
+    /** Call from onPause() / onDreamingStopped(): stops the light sensor. */
+    public void pause() {
+        if (sensorManager != null && sensorRegistered) {
+            sensorManager.unregisterListener(this);
+            sensorRegistered = false;
+        }
+    }
+
+    /** Call from onResume() / onDreamingStarted(): restarts the light sensor. */
+    public void resume() {
+        if (sensorManager != null && lightSensor != null && !sensorRegistered) {
+            sensorManager.registerListener(this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
+            sensorRegistered = true;
         }
     }
 
     public void destroy() {
-        if (sensorManager != null) {
-            sensorManager.unregisterListener(this);
-        }
+        pause();
     }
 
     @Override
@@ -74,9 +89,11 @@ public final class StandbyBridge implements SensorEventListener {
             AlarmClockInfo info = am.getNextAlarmClock();
             if (info == null) return "";
             long trigger = info.getTriggerTime();
+            // Latin digits keep the alarm readable in every locale,
+            // matching the clock face style.
             java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat(
                     is24Hour() ? "HH:mm" : "h:mm",
-                    java.util.Locale.getDefault()
+                    java.util.Locale.US
             );
             return sdf.format(new java.util.Date(trigger));
         } catch (Exception e) {
@@ -84,33 +101,19 @@ public final class StandbyBridge implements SensorEventListener {
         }
     }
 
-    /** Light selection tick — phone only; no-op if vibrator missing. */
+    /** Light selection tick — no-op if vibrator missing. */
     @JavascriptInterface
     public void hapticTick() {
-        try {
-            Vibrator vibrator = null;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                VibratorManager vm = (VibratorManager) context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE);
-                if (vm != null) vibrator = vm.getDefaultVibrator();
-            } else {
-                vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
-            }
-            if (vibrator == null || !vibrator.hasVibrator()) return;
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK));
-            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                vibrator.vibrate(VibrationEffect.createOneShot(12, VibrationEffect.DEFAULT_AMPLITUDE));
-            } else {
-                vibrator.vibrate(12);
-            }
-        } catch (Exception ignored) {
-        }
+        vibrate(12, VibrationEffect.EFFECT_TICK);
     }
 
     /** Slightly stronger confirmation (e.g. opening sheet). */
     @JavascriptInterface
     public void hapticClick() {
+        vibrate(18, VibrationEffect.EFFECT_CLICK);
+    }
+
+    private void vibrate(int ms, int predefined) {
         try {
             Vibrator vibrator = null;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -122,11 +125,11 @@ public final class StandbyBridge implements SensorEventListener {
             if (vibrator == null || !vibrator.hasVibrator()) return;
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK));
+                vibrator.vibrate(VibrationEffect.createPredefined(predefined));
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                vibrator.vibrate(VibrationEffect.createOneShot(18, VibrationEffect.DEFAULT_AMPLITUDE));
+                vibrator.vibrate(VibrationEffect.createOneShot(ms, VibrationEffect.DEFAULT_AMPLITUDE));
             } else {
-                vibrator.vibrate(18);
+                vibrator.vibrate(ms);
             }
         } catch (Exception ignored) {
         }

@@ -24,8 +24,6 @@ public final class StandbyDreamService extends DreamService {
         bridge = new StandbyBridge(this);
         webView = PreviewActivity.createClockWebView(this, false, bridge);
 
-        // Critical: force WebView to fill the entire dream window
-        // Without this, content can stick to top/bottom instead of centering
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
@@ -46,6 +44,7 @@ public final class StandbyDreamService extends DreamService {
     @Override
     public void onDreamingStarted() {
         super.onDreamingStarted();
+        if (bridge != null) bridge.resume();
         if (webView != null) {
             webView.onResume();
             webView.resumeTimers();
@@ -54,6 +53,7 @@ public final class StandbyDreamService extends DreamService {
 
     @Override
     public void onDreamingStopped() {
+        if (bridge != null) bridge.pause(); // FIX: sensor off while not dreaming
         if (webView != null) {
             webView.onPause();
             webView.pauseTimers();

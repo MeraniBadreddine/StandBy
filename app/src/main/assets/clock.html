@@ -27,10 +27,13 @@ html, body {
 }
 body.interactive { cursor: default; }
 
+/* FIX: veil now sits BEHIND the stage — red tint on background only,
+   digits keep their true palette colors. True black base for OLED. */
 #night-veil {
   position: fixed; inset: 0;
-  background: radial-gradient(ellipse at center, #2a0a00 0%, #0d0200 100%);
-  opacity: 0; pointer-events: none; z-index: 40;
+  background-color: #000;
+  background-image: radial-gradient(ellipse at center, #2a0a00 0%, #0d0200 100%);
+  opacity: 0; pointer-events: none; z-index: 1;
   transition: opacity 2.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -39,13 +42,18 @@ body.interactive { cursor: default; }
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   width: 100%; max-width: 100%; padding: 0 3vw;
   animation: drift 240s ease-in-out infinite alternate;
+  transition: opacity 2.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
+/* FIX: burn-in protection widened from ±1px to ±3px */
 @keyframes drift {
   0%   { transform: translate(0, 0); }
-  25%  { transform: translate(1.2px, -0.6px); }
-  50%  { transform: translate(-0.8px, 1.0px); }
-  75%  { transform: translate(0.6px, 0.8px); }
-  100% { transform: translate(-1.0px, -0.7px); }
+  12%  { transform: translate(2.6px, -1.4px); }
+  25%  { transform: translate(-2.2px, 2.8px); }
+  40%  { transform: translate(3.0px, 1.6px); }
+  55%  { transform: translate(-2.8px, -2.4px); }
+  70%  { transform: translate(1.8px, 2.6px); }
+  85%  { transform: translate(-3.0px, 1.2px); }
+  100% { transform: translate(2.4px, -2.0px); }
 }
 
 #stage.size-s svg#clock { width: min(56vw, 620px); }
@@ -59,7 +67,7 @@ body.interactive { cursor: default; }
 
 svg#clock {
   height: auto; overflow: visible; display: block;
-  filter: drop-shadow(0 26px 52px rgba(0,0,0,0.9));
+  /* FIX: expensive invisible drop-shadow removed (black on black) */
   transition: width 0.6s cubic-bezier(0.22,1,0.36,1);
 }
 
@@ -78,9 +86,7 @@ svg#clock {
   transition: opacity 0.55s cubic-bezier(0.22,1,0.36,1), max-height 0.45s ease, margin 0.45s ease;
   font-variant-numeric: tabular-nums;
 }
-#alarm.show {
-  opacity: 1; max-height: 28px;
-}
+#alarm.show { opacity: 1; max-height: 28px; }
 #alarm .icon { width: 13px; height: 13px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
 #alarm .icon svg { width: 13px; height: 13px; display: block; }
 #alarm .time {
@@ -90,7 +96,9 @@ svg#clock {
 
 #date {
   font-size: clamp(12.5px, 2.1vw, 17px); font-weight: 500;
-  letter-spacing: 0.035em; color: rgba(255,255,255,0.32);
+  letter-spacing: 0.035em;
+  /* FIX: contrast raised from 0.32 (~2.7:1) to 0.62 (~7:1) */
+  color: rgba(255,255,255,0.62);
   text-align: center; line-height: 1.2;
   opacity: 0; max-height: 0; overflow: hidden;
   transition: opacity 0.55s cubic-bezier(0.22,1,0.36,1), max-height 0.45s ease;
@@ -100,16 +108,13 @@ svg#clock {
 .solar-digit { mix-blend-mode: screen; }
 .dot { mix-blend-mode: screen; opacity: 0.9; }
 
-.digit-rise {
-  animation: riseIn 0.52s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
+.digit-rise { animation: riseIn 0.52s cubic-bezier(0.16, 1, 0.3, 1) both; }
 @keyframes riseIn {
   0%   { opacity: 0; transform: translateY(12px) scale(0.97); }
   70%  { opacity: 1; }
   100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* Button – phone only visible in preview; always for TV remote path via OK */
 #btn {
   position: fixed;
   top: max(16px, env(safe-area-inset-top));
@@ -117,8 +122,9 @@ svg#clock {
   width: 42px; height: 42px; border-radius: 50%;
   border: 1px solid var(--glass-border);
   background: var(--glass);
-  backdrop-filter: blur(50px) saturate(180%);
-  -webkit-backdrop-filter: blur(50px) saturate(180%);
+  /* FIX: blur 50px -> 24px (phone GPU cost) */
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
   display: none; align-items: center; justify-content: center;
   z-index: 300; opacity: 0.55;
   transition: opacity 0.35s, background 0.35s, border-color 0.35s, transform 0.35s cubic-bezier(0.22,1,0.36,1);
@@ -140,8 +146,9 @@ body.preview #btn { display: flex; }
   width: min(300px, 86vw);
   max-height: min(74vh, 520px);
   background: var(--glass);
-  backdrop-filter: blur(80px) saturate(200%);
-  -webkit-backdrop-filter: blur(80px) saturate(200%);
+  /* FIX: blur 80px -> 24px */
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
   border-radius: 20px;
   border: 1px solid var(--glass-border);
   box-shadow: 0 25px 50px rgba(0,0,0,0.55), inset 0 0.5px 0 rgba(255,255,255,0.12);
@@ -157,6 +164,9 @@ body.preview #btn { display: flex; }
   transform: scale(1) translateY(0);
   pointer-events: auto;
 }
+/* RTL: mirror the sheet position for Arabic */
+html[dir="rtl"] #btn  { right: auto; left: max(16px, env(safe-area-inset-left)); }
+html[dir="rtl"] #sheet { right: auto; left: max(14px, env(safe-area-inset-left)); }
 
 .segmented {
   display: flex; margin: 12px 12px 0; padding: 3px;
@@ -186,6 +196,7 @@ body.preview #btn { display: flex; }
 }
 .row:last-child { border-bottom: none; }
 .row-label { font-size: 15px; font-weight: 500; color: var(--label); }
+html[dir="rtl"] .row { flex-direction: row-reverse; }
 
 .pills {
   display: flex; gap: 4px; background: rgba(0,0,0,0.28);
@@ -242,7 +253,6 @@ body.preview #btn { display: flex; }
   box-shadow: 0 0 0 1px rgba(255,255,255,0.2);
 }
 
-/* First-run welcome */
 #welcome {
   position: fixed; inset: 0; z-index: 400;
   display: none; align-items: center; justify-content: center;
@@ -264,12 +274,8 @@ body.preview #btn { display: flex; }
   transition: transform 0.5s cubic-bezier(0.22,1,0.36,1);
 }
 #welcome.show .card { transform: translateY(0) scale(1); }
-#welcome h1 {
-  font-size: 22px; font-weight: 600; color: #fff; margin-bottom: 10px;
-}
-#welcome p {
-  font-size: 15px; line-height: 1.45; color: rgba(255,255,255,0.55); margin-bottom: 22px;
-}
+#welcome h1 { font-size: 22px; font-weight: 600; color: #fff; margin-bottom: 10px; }
+#welcome p { font-size: 15px; line-height: 1.45; color: rgba(255,255,255,0.55); margin-bottom: 22px; }
 #welcome .cta {
   width: 100%; height: 44px; border: none; border-radius: 12px;
   background: var(--blue); color: #fff; font-size: 16px; font-weight: 600;
@@ -289,8 +295,6 @@ body.preview #btn { display: flex; }
 }
 #hint.show { opacity: 1; visibility: visible; }
 
-/* TV: slightly larger touch targets already via remote; phone: denser sheet */
-body.is-tv #sheet { width: min(340px, 86vw); }
 body.is-phone #btn { opacity: 0.7; }
 </style>
 </head>
@@ -298,7 +302,7 @@ body.is-phone #btn { opacity: 0.7; }
 <div id="night-veil"></div>
 
 <div id="stage" class="size-m">
-  <svg id="clock" role="img" aria-label="StandBy Clock"></svg>
+  <svg id="clock" role="timer" aria-label="StandBy"></svg>
   <div id="meta">
     <div id="alarm">
       <span class="icon">
@@ -321,8 +325,8 @@ body.is-phone #btn { opacity: 0.7; }
 
 <div id="sheet">
   <div class="segmented">
-    <button class="active" data-pane="settings">Settings</button>
-    <button data-pane="colors">Colors</button>
+    <button class="active" data-pane="settings" data-i18n="settings"></button>
+    <button data-pane="colors" data-i18n="colors"></button>
   </div>
   <div id="pane-settings" class="pane active"></div>
   <div id="pane-colors" class="pane"><div id="colors-grid"></div></div>
@@ -331,12 +335,12 @@ body.is-phone #btn { opacity: 0.7; }
 <div id="welcome">
   <div class="card">
     <h1>StandBy</h1>
-    <p>Tap <strong>+</strong> to change colors, style, and more.<br>On TV, press OK on your remote.</p>
-    <button class="cta" id="welcome-ok">Continue</button>
+    <p id="welcome-text"></p>
+    <button class="cta" id="welcome-ok" data-i18n="continue"></button>
   </div>
 </div>
 
-<div id="hint">Tap + to customize</div>
+<div id="hint"></div>
 
 <script>
 const KX = 1.37, GAP = -14, COLON_DOT = 6, COLON_ADV = 8;
@@ -374,20 +378,56 @@ const PALETTES = [
 
 const TILT_SOLAR = [{r:-3.2,y:1.2},{r:1.8,y:-1.8},{r:-3.8,y:2.2},{r:3.4,y:-0.8}];
 
+/* ===== i18n: Arabic / French / English (UI only — clock face untouched) ===== */
+const I18N = {
+  ar: { dir:'rtl', settings:'الإعدادات', colors:'الألوان', seconds:'الثواني',
+        timeFormat:'صيغة الوقت', date:'التاريخ', alarm:'المنبّه', nightMode:'الوضع الليلي',
+        autoColor:'لون تلقائي', size:'الحجم', on:'مفعّل', off:'متوقف', auto:'تلقائي',
+        welcomeMsg:'اضغط <strong>+</strong> لتغيير الألوان والنمط والمزيد.',
+        continueBtn:'متابعة', hint:'اضغط + للتخصيص', clockAria:'الساعة' },
+  fr: { dir:'ltr', settings:'Réglages', colors:'Couleurs', seconds:'Secondes',
+        timeFormat:'Format horaire', date:'Date', alarm:'Alarme', nightMode:'Mode nuit',
+        autoColor:'Couleur auto', size:'Taille', on:'Activé', off:'Désactivé', auto:'Auto',
+        welcomeMsg:'Touchez <strong>+</strong> pour changer couleurs, style et plus.',
+        continueBtn:'Continuer', hint:'Touchez + pour personnaliser', clockAria:'Horloge' },
+  en: { dir:'ltr', settings:'Settings', colors:'Colors', seconds:'Seconds',
+        timeFormat:'Time Format', date:'Date', alarm:'Alarm', nightMode:'Night Mode',
+        autoColor:'Auto Color', size:'Size', on:'On', off:'Off', auto:'Auto',
+        welcomeMsg:'Tap <strong>+</strong> to change colors, style, and more.',
+        continueBtn:'Continue', hint:'Tap + to customize', clockAria:'Clock' }
+};
+const lang0 = (navigator.language || 'en').toLowerCase();
+const LANG = lang0.startsWith('ar') ? 'ar' : (lang0.startsWith('fr') ? 'fr' : 'en');
+const T = I18N[LANG];
+document.documentElement.lang = LANG;
+document.documentElement.dir = T.dir;
+
+/* Apply static translations */
+document.querySelectorAll('[data-i18n]').forEach(el => {
+  el.textContent = T[el.dataset.i18n];
+});
+document.getElementById('welcome-text').innerHTML = T.welcomeMsg;
+document.getElementById('hint').textContent = T.hint;
+
 const params = new URLSearchParams(location.search);
 const isPreview = params.get('mode') !== 'dream';
 if (isPreview) document.body.classList.add('preview');
 else document.body.classList.add('dream');
-
-/* Phone vs TV heuristic */
-const isTV = /TV|Android TV|BRAVIA|AFT|GoogleTV/i.test(navigator.userAgent)
-  || (window.innerWidth >= 960 && !('ontouchstart' in window));
-document.body.classList.add(isTV ? 'is-tv' : 'is-phone');
+document.body.classList.add('is-phone');
 
 const Native = window.StandbyNative || null;
 function nativeIs24h() { try { return Native ? Native.is24Hour() : true; } catch(e) { return true; } }
 function nativeLux() { try { return Native ? Native.getLux() : 100; } catch(e) { return 100; } }
 function nativeAlarm() { try { return Native ? (Native.getNextAlarm() || '') : ''; } catch(e) { return ''; } }
+
+/* FIX: cache native (Java) values — refreshed once per minute, not every tick */
+let cached24h = null;
+let cachedAlarm = '';
+function refreshNativeCache() {
+  cached24h = nativeIs24h();
+  cachedAlarm = nativeAlarm();
+}
+refreshNativeCache();
 
 function saveBool(k,v){ try{if(Native)Native.saveBool(k,v);}catch(e){} try{localStorage.setItem(k,v?'1':'0');}catch(e){} }
 function getBool(k,d){ try{if(Native)return Native.getBool(k,d);}catch(e){} try{const v=localStorage.getItem(k);if(v===null)return d;return v==='1';}catch(e){return d;} }
@@ -439,30 +479,51 @@ function persist() {
 function use24hNow() {
   if (S.hour12 === '24') return true;
   if (S.hour12 === '12') return false;
-  return nativeIs24h();
+  return cached24h !== null ? cached24h : true;
 }
 
+/* FIX: night mode — EMA smoothing + hysteresis band + deeper max dimming.
+   Veil is behind the digits: red tint on background only, digits dimmed
+   separately via #stage opacity. True black preserved for OLED. */
+let smoothLux = 100;
+let lastAppliedIntensity = -1;
 function applyNight() {
   const veil = document.getElementById('night-veil');
-  if (!S.night) { veil.style.opacity = '0'; return; }
+  if (!S.night) {
+    veil.style.opacity = '0';
+    stage.style.opacity = '1';
+    lastAppliedIntensity = -1;
+    return;
+  }
+  /* EMA smoothing: rejects sensor jitter */
+  smoothLux = smoothLux * 0.75 + nativeLux() * 0.25;
+
   let intensity = 0;
-  const lux = nativeLux();
-  if (lux < 5) intensity = 0.55;
-  else if (lux < 15) intensity = 0.48;
-  else if (lux < 40) intensity = 0.28;
-  else if (lux < 80) intensity = 0.12;
+  const lux = smoothLux;
+  if (lux < 4) intensity = 0.92;          /* deep dark bedroom */
+  else if (lux < 10) intensity = 0.80;
+  else if (lux < 25) intensity = 0.58;
+  else if (lux < 50) intensity = 0.32;
+  else if (lux < 100) intensity = 0.14;
   else {
     const h = new Date().getHours();
-    if (h >= 22 || h < 5) intensity = 0.48;
-    else if (h >= 20 || h < 7) intensity = 0.32;
+    if (h >= 22 || h < 5) intensity = 0.80;
+    else if (h >= 20 || h < 7) intensity = 0.45;
   }
-  veil.style.opacity = intensity;
+
+  /* Hysteresis: ignore small oscillation around the applied value */
+  if (lastAppliedIntensity >= 0 && Math.abs(intensity - lastAppliedIntensity) < 0.12) return;
+  lastAppliedIntensity = intensity;
+
+  veil.style.opacity = String(intensity);
+  /* Dim digits too (veil no longer covers them) — never below 55% */
+  stage.style.opacity = String(1 - intensity * 0.45);
 }
 
 function updateAlarm() {
   const alarmEl = document.getElementById('alarm');
   const text = document.getElementById('alarm-text');
-  const next = S.alarm ? nativeAlarm() : '';
+  const next = S.alarm ? cachedAlarm : '';
   if (next) {
     text.textContent = next;
     alarmEl.classList.add('show');
@@ -529,44 +590,44 @@ document.querySelectorAll('.segmented button').forEach(b => {
 function buildSettings() {
   const el = document.getElementById('pane-settings');
   el.innerHTML = `
-    <div class="row"><span class="row-label">Seconds</span>
+    <div class="row"><span class="row-label">${T.seconds}</span>
       <div class="pills">
-        <button class="pill ${S.seconds?'on':''}" data-k="seconds" data-v="1">On</button>
-        <button class="pill ${!S.seconds?'on':''}" data-k="seconds" data-v="0">Off</button>
+        <button class="pill ${S.seconds?'on':''}" data-k="seconds" data-v="1">${T.on}</button>
+        <button class="pill ${!S.seconds?'on':''}" data-k="seconds" data-v="0">${T.off}</button>
       </div>
     </div>
-    <div class="row"><span class="row-label">Time Format</span>
+    <div class="row"><span class="row-label">${T.timeFormat}</span>
       <div class="pills">
-        <button class="pill ${S.hour12==='auto'?'on':''}" data-k="hour12" data-v="auto">Auto</button>
+        <button class="pill ${S.hour12==='auto'?'on':''}" data-k="hour12" data-v="auto">${T.auto}</button>
         <button class="pill ${S.hour12==='24'?'on':''}" data-k="hour12" data-v="24">24h</button>
         <button class="pill ${S.hour12==='12'?'on':''}" data-k="hour12" data-v="12">12h</button>
       </div>
     </div>
-    <div class="row"><span class="row-label">Date</span>
+    <div class="row"><span class="row-label">${T.date}</span>
       <div class="pills">
-        <button class="pill ${S.date?'on':''}" data-k="date" data-v="1">On</button>
-        <button class="pill ${!S.date?'on':''}" data-k="date" data-v="0">Off</button>
+        <button class="pill ${S.date?'on':''}" data-k="date" data-v="1">${T.on}</button>
+        <button class="pill ${!S.date?'on':''}" data-k="date" data-v="0">${T.off}</button>
       </div>
     </div>
-    <div class="row"><span class="row-label">Alarm</span>
+    <div class="row"><span class="row-label">${T.alarm}</span>
       <div class="pills">
-        <button class="pill ${S.alarm?'on':''}" data-k="alarm" data-v="1">On</button>
-        <button class="pill ${!S.alarm?'on':''}" data-k="alarm" data-v="0">Off</button>
+        <button class="pill ${S.alarm?'on':''}" data-k="alarm" data-v="1">${T.on}</button>
+        <button class="pill ${!S.alarm?'on':''}" data-k="alarm" data-v="0">${T.off}</button>
       </div>
     </div>
-    <div class="row"><span class="row-label">Night Mode</span>
+    <div class="row"><span class="row-label">${T.nightMode}</span>
       <div class="pills">
-        <button class="pill ${S.night?'on':''}" data-k="night" data-v="1">On</button>
-        <button class="pill ${!S.night?'on':''}" data-k="night" data-v="0">Off</button>
+        <button class="pill ${S.night?'on':''}" data-k="night" data-v="1">${T.on}</button>
+        <button class="pill ${!S.night?'on':''}" data-k="night" data-v="0">${T.off}</button>
       </div>
     </div>
-    <div class="row"><span class="row-label">Auto Color</span>
+    <div class="row"><span class="row-label">${T.autoColor}</span>
       <div class="pills">
-        <button class="pill ${S.auto?'on':''}" data-k="auto" data-v="1">On</button>
-        <button class="pill ${!S.auto?'on':''}" data-k="auto" data-v="0">Off</button>
+        <button class="pill ${S.auto?'on':''}" data-k="auto" data-v="1">${T.on}</button>
+        <button class="pill ${!S.auto?'on':''}" data-k="auto" data-v="0">${T.off}</button>
       </div>
     </div>
-    <div class="row"><span class="row-label">Size</span>
+    <div class="row"><span class="row-label">${T.size}</span>
       <div class="pills">
         <button class="pill ${S.size==='s'?'on':''}" data-k="size" data-v="s">S</button>
         <button class="pill ${S.size==='m'?'on':''}" data-k="size" data-v="m">M</button>
@@ -620,6 +681,9 @@ function apply() {
   applyNight();
   forceRebuild = true;
   render(true);
+  /* FIX: settings changed -> the wake cadence must change with it.
+     Otherwise a pending minute-boundary timer keeps the seconds frozen. */
+  scheduleClockTick();
 }
 
 /* First-run */
@@ -656,36 +720,7 @@ function hideHint() {
   saveBool('sb_hint_seen', true);
 }
 
-window.addEventListener('keydown', e => {
-  if (!isPreview) return;
-  if (['ArrowRight','ArrowDown','DPAD_RIGHT','DPAD_DOWN'].includes(e.key)) {
-    e.preventDefault();
-    if (open) {
-      paletteIdx = (paletteIdx + 1) % PALETTES.length;
-      persist();
-      document.querySelectorAll('.swatch').forEach((s,j) => s.classList.toggle('on', j===paletteIdx));
-      applyPaletteInPlace();
-      hapticTick();
-    }
-  } else if (['ArrowLeft','ArrowUp','DPAD_LEFT','DPAD_UP'].includes(e.key)) {
-    e.preventDefault();
-    if (open) {
-      paletteIdx = (paletteIdx - 1 + PALETTES.length) % PALETTES.length;
-      persist();
-      document.querySelectorAll('.swatch').forEach((s,j) => s.classList.toggle('on', j===paletteIdx));
-      applyPaletteInPlace();
-      hapticTick();
-    }
-  } else if (['Enter','OK','Select'].includes(e.key)) {
-    e.preventDefault();
-    if (welcome.classList.contains('show')) hideWelcome();
-    else toggleSheet();
-  } else if (['Back','Escape','Backspace'].includes(e.key) && open) {
-    e.preventDefault(); toggleSheet();
-  }
-});
-
-/* Clock engine */
+/* ===== Clock engine (unchanged look) ===== */
 function squeeze(path, kx) {
   const tokens = path.match(/[MLCZ]|-?\d+(?:\.\d+)?/g);
   let n = 0;
@@ -711,7 +746,6 @@ function layout(text) {
       continue;
     }
     const d = Number(ch);
-    // center glyph in fixed cell
     xs.push(x + (SLOT - INK[d]) / 2);
     x += SLOT + GAP;
   }
@@ -804,11 +838,10 @@ function buildFull(text, xs, width, pal, stroke, tilt, dotR) {
     cellX += SLOT + GAP;
     di++;
   });
-  // Lock frame size for this structure (HH:MM or HH:MM:SS)
   svg.setAttribute('viewBox', `0 0 ${width.toFixed(2)} 100`);
 }
 
-/** Creative fix: only swap the glyph inside its locked cell; never touch colons or frame. */
+/** Only swap the glyph inside its locked cell; never touch colons or frame. */
 function updateDigitsOnly(text, pal, stroke, tilt) {
   let di = 0;
   let cellX = 0;
@@ -835,6 +868,11 @@ function updateDigitsOnly(text, pal, stroke, tilt) {
     cellX += SLOT + GAP;
     di++;
   }
+}
+
+/* FIX: accessibility — live aria-label announcing the time */
+function updateAria(text) {
+  svg.setAttribute('aria-label', T.clockAria + ' ' + text);
 }
 
 function render(force = false) {
@@ -868,20 +906,33 @@ function render(force = false) {
     buildFull(text, xs, width, pal, stroke, tilt, dotR);
     forceRebuild = false;
   } else {
-    // Same structure → frame + colons frozen; only changed digits swap in-cell
     updateDigitsOnly(text, pal, stroke, tilt);
   }
 
+  updateAria(text);
   updateDate();
   applyNight();
 }
 
+/* FIX: performance — when seconds are off, wake at the MINUTE boundary
+   instead of every second. Native cache refreshed once per minute.
+   FIX 2: track the pending timer — on any settings change (apply()),
+   clear it and reschedule so the new cadence (1s vs 60s) starts now,
+   not at the end of the previous (possibly 60s) sleep. */
+let tickHandle = null;
+function nextWakeDelay() {
+  return S.seconds
+    ? 1000 - (Date.now() % 1000)
+    : 60000 - (Date.now() % 60000);
+}
 function scheduleClockTick() {
-  const delay = 1000 - (Date.now() % 1000);
-  setTimeout(() => {
+  if (tickHandle !== null) clearTimeout(tickHandle);
+  tickHandle = setTimeout(() => {
+    tickHandle = null;
+    refreshNativeCache();   // Java calls: once per wake (per minute)
     render(false);
     scheduleClockTick();
-  }, delay);
+  }, nextWakeDelay());
 }
 
 buildSettings();
@@ -890,7 +941,6 @@ render(true);
 showWelcome();
 scheduleClockTick();
 setInterval(applyNight, 4000);
-setInterval(updateAlarm, 60000);
 
 if (params.get('customize') === 'true') toggleSheet();
 
