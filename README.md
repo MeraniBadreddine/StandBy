@@ -8,7 +8,7 @@ Simplicity by design. Perfection by detail.
 
 <br>
 
-[![Download v4.0](https://img.shields.io/badge/Download-StandBy_v4.0_APK-0A84FF?style=for-the-badge&logo=apple&logoColor=white)](https://github.com/MeraniBadreddine/StandBy/releases/tag/v4.0)
+[![Download v4.0](https://img.shields.io/badge/Download-StandBy_v4.0_APK-0A84FF?style=for-the-badge&logo=apple&logoColor=white)]([https://github.com/MeraniBadreddine/StandBy/releases/tag/v4.0](https://github.com/MeraniBadreddine/StandBy/releases/download/v4.0/app-debug.apk))
 
 **Version 4.0** &nbsp;·&nbsp; **Android Phone Edition** &nbsp;·&nbsp; **Native Performance**
 
