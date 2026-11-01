@@ -3,14 +3,18 @@
 # StandBy
 ### Time, elevated.
 
-A calm, beautifully considered ambient clock experience for Android phones.  
-Simplicity by design. Perfection by detail.
+A refined ambient clock experience for Android phones.  
+Time in its purest form. Simplicity by design.
 
 <br>
 
-[![Download v4.0.2](https://img.shields.io/badge/Download-StandBy_v4.0.2_APK-0A84FF?style=for-the-badge&logo=apple&logoColor=white)](https://github.com/MeraniBadreddine/StandBy/releases/download/v4.0.2/app-release.apk)
+[![Download v4.0.2](https://img.shields.io/badge/Download-v4.0.2-0A84FF?style=for-the-badge&logo=android&logoColor=white)](https://github.com/MeraniBadreddine/StandBy/releases/download/v4.0.2/app-release.apk)
 
-**Version 4.0.2** &nbsp;·&nbsp; **Android Phone Edition** &nbsp;·&nbsp; **Native Performance**
+[![Version](https://img.shields.io/badge/Version-4.0.2-30D158?style=flat-square)](https://github.com/MeraniBadreddine/StandBy/releases/tag/v4.0.2)
+![Platform](https://img.shields.io/badge/Platform-Android-0A84FF?style=flat-square)
+![Project](https://img.shields.io/badge/Project-Open%20Source-8E8E93?style=flat-square)
+
+**Version 4.0.2** &nbsp;·&nbsp; **Native Android** &nbsp;·&nbsp; **Phone Edition**
 
 <br>
 
@@ -20,30 +24,48 @@ Simplicity by design. Perfection by detail.
 
 </div>
 
-StandBy reimagines what your Android phone can become when it is not in active use. Place it on your nightstand, desk, or charging stand, and transform idle moments into a calm, atmospheric clock display.
+StandBy transforms an idle Android phone into a refined ambient clock. Designed for nightstands, desks, and charging stands, it combines carefully crafted clock typography, fluid transitions, adaptive brightness, and native Android screensaver integration.
 
-Designed exclusively for phones, StandBy combines carefully crafted vector typography, smooth digit transitions, and intelligent screen dimming.
+Built to remain visually calm while providing meaningful customization, StandBy brings together a lightweight HTML rendering layer and native Android capabilities.
 
-*Every pixel is deliberate. Every motion has a purpose. Just pure, essential time.*
+*Less interface. More atmosphere. Time, with intention.*
 
 ---
 
 ## Crafted with Precision
 
-- **Proportions in Harmony**  
-  Featuring bespoke, solar-inspired SVG clock typography with carefully refined proportions, spacing, and optical alignment. The clock maintains its visual structure while individual digits transition smoothly.
+- **A Distinctive Clock Experience**  
+  A bespoke, solar-inspired SVG clock design with carefully balanced proportions, optical alignment, and spacing. Individual digits transition smoothly while maintaining their visual positions and structure.
 
-- **Intelligent Atmosphere**  
-  StandBy adapts to ambient lighting through the device's light sensor, with a scheduled nighttime mode as a fallback. Gradual dimming and hysteresis help prevent abrupt brightness changes.
+- **Intelligent Ambient Lighting**  
+  Uses the device's ambient light sensor to adapt display brightness to surrounding conditions. Gradual brightness transitions and hysteresis help prevent sudden changes. A scheduled nighttime mode provides an alternative when automatic light adaptation is unavailable or not preferred.
 
-- **Personalized Elegance**  
-  Choose from 10 curated color palettes, adjust the clock size across Small, Medium, and Large, and switch between 12-hour and 24-hour formats. Enable seconds, display the date and next alarm, and customize additional display preferences.
+- **Personalized Color Palettes**  
+  Explore 10 curated color palettes designed to create different visual atmospheres while preserving the clock's identity and readability.
 
-- **Designed for OLED**  
-  Subtle screen-position shifting helps reduce the risk of image retention during extended display sessions. Optimized rendering and lightweight animations help keep the experience efficient.
+- **Flexible Clock Sizing**  
+  Select Small, Medium, or Large clock sizes to suit different phone screens, viewing distances, and placement preferences.
 
-- **A Native Android Experience**  
-  Built around Android's native DreamService architecture, StandBy provides a system screensaver alongside an interactive preview and customization experience.
+- **12-Hour and 24-Hour Formats**  
+  Choose the time format that matches your preference, with optional seconds for a more detailed time display.
+
+- **Useful Information at a Glance**  
+  Customize additional display information, including the date and next alarm, to keep essential details accessible without cluttering the screen.
+
+- **Smooth and Purposeful Motion**  
+  Digit transitions and visual updates are optimized to maintain a fluid experience while avoiding unnecessary rendering work.
+
+- **OLED Display Consideration**  
+  Subtle screen-position shifting helps reduce the risk of prolonged static-image exposure. The clock is designed to remain visually restrained during extended sessions.
+
+- **Native Android Screensaver**  
+  Integrates with Android's DreamService architecture, allowing StandBy to operate as a system screensaver rather than simply functioning as an ordinary clock screen.
+
+- **Interactive Preview and Settings**  
+  Preview the clock and adjust its appearance through the application's interactive interface before activating the system screensaver.
+
+- **Multilingual Interface**  
+  Includes multilingual settings with Arabic right-to-left interface support.
 
 ---
 
@@ -51,89 +73,130 @@ Designed exclusively for phones, StandBy combines carefully crafted vector typog
 
 | Specification | Implementation |
 | :--- | :--- |
-| **Typography** | Custom SVG clock glyphs |
-| **Adaptive Lighting** | Ambient light sensor and scheduled night mode |
-| **Color Palette** | 10 curated color palettes |
-| **Chronometry** | System-synchronized 12/24-hour clock |
+| **Clock Rendering** | HTML and custom SVG clock glyphs |
+| **Clock Design** | Solar-inspired typography |
+| **Time Format** | 12-hour and 24-hour |
+| **Seconds Display** | Optional seconds |
+| **Date Display** | Customizable date visibility |
+| **Next Alarm** | Optional next-alarm information |
+| **Color Palettes** | 10 curated palettes |
 | **Clock Scale** | Small, Medium, and Large |
-| **OLED Consideration** | Subtle pixel-position drift |
-| **Motion** | Smooth digit transitions and optimized updates |
+| **Adaptive Lighting** | Ambient light sensor |
+| **Night Mode** | Scheduled nighttime mode |
+| **Brightness Control** | Gradual dimming and hysteresis |
+| **Motion** | Smooth digit transitions |
+| **OLED Consideration** | Subtle pixel-position shifting |
+| **System Integration** | Native Android DreamService |
+| **Interactive Preview** | Native preview activity |
+| **Native Bridge** | Sensors and Android system information |
 | **Interface** | Multilingual settings with Arabic RTL support |
-| **Screensaver Engine** | Native Android DreamService |
-| **Native Integration** | Battery, charging state, next alarm, and haptics |
+| **Dependencies** | No third-party libraries |
 
 ---
 
 ## Getting Started
 
 1. **Download**  
-   Get the latest `v4.0.2` APK directly from the [GitHub Releases Page](https://github.com/MeraniBadreddine/StandBy/releases/tag/v4.0.2) and install it on your Android phone.
+   Download the signed Android APK from the official GitHub release.
 
-2. **Customize**  
-   Open StandBy to preview the clock and access its settings. Choose your preferred color palette, clock size, time format, and display options.
+   [Download StandBy v4.0.2](https://github.com/MeraniBadreddine/StandBy/releases/download/v4.0.2/app-release.apk)
 
-3. **Activate**  
-   Open your Android system settings and navigate to:  
-   `Settings → Display → Screen saver`  
-   Select StandBy and configure when your phone should activate the screensaver.
+2. **Install**  
+   Open the downloaded APK and follow the Android installation instructions. You may need to allow installation from your browser or file manager.
 
-*For the best experience, place your phone on a stable stand while charging.*
+3. **Customize**  
+   Open StandBy to access the interactive preview and settings. Select your preferred palette, clock size, time format, and additional display options.
+
+4. **Activate the Screensaver**  
+   Open your Android system settings and navigate to:
+
+   `Settings → Display → Screen saver`
+
+   Select StandBy and configure when the screensaver should activate.
+
+5. **Enjoy the Ambient Experience**  
+   Place your phone on a stable stand, preferably while charging, and let StandBy transform its idle display into an ambient clock.
+
+*System menu names and screensaver availability may vary depending on the Android manufacturer and device.*
 
 ---
 
 ## Engineering Philosophy
 
-- **Invisible Interface:** The clock remains the focus; controls appear only when needed.
-- **Purposeful Control:** Every setting has a clear function.
-- **Fluid Motion:** Digit positions remain visually anchored while changing smoothly.
-- **Adaptive Comfort:** Gradual dimming creates a more comfortable nighttime display.
-- **Hardware Awareness:** Sensor-driven behavior and subtle screen movement help make extended use more considerate of the display.
+- **Clarity First:** Time remains the primary focus, without unnecessary interface elements.
+- **Purposeful Customization:** Every setting contributes to a meaningful aspect of the clock experience.
+- **Fluid Motion:** Digit transitions preserve visual stability and avoid distracting movement.
+- **Adaptive Comfort:** Gradual dimming and nighttime scheduling support comfortable viewing in different lighting conditions.
+- **Display Awareness:** Subtle position shifting helps reduce prolonged static-image exposure.
+- **Native Integration:** Android system capabilities are used directly through native components.
+- **Lightweight Architecture:** A focused rendering layer and native bridge keep the application simple and efficient.
 
 ---
 
 ## Architecture
 
-StandBy follows a lightweight architecture combining an optimized HTML rendering layer with a native Android bridge.
+StandBy combines a lightweight HTML-based clock interface with native Android components.
 
 ```text
 PreviewActivity
-└── Interactive phone preview and customization
+└── Interactive clock preview
+    └── Settings and customization
 
 StandbyDreamService
 └── Native Android system screensaver
+    └── Screensaver lifecycle and display
 
 StandbyBridge
-└── Sensors, system alarms, battery, haptics and native state
+└── Native Android integration
+    ├── Ambient light sensor
+    ├── Battery and charging state
+    ├── System alarms
+    ├── Haptic feedback
+    └── Native application state
 
-assets/clock.html
-└── Clock rendering, animations, themes and settings
+assets/
+└── clock.html
+    ├── SVG clock rendering
+    ├── Digit transitions
+    ├── Color palettes
+    ├── Clock sizing
+    ├── Time and date formatting
+    ├── Brightness adaptation
+    └── Display preferences
 ```
 
 ---
 
 ## Build from Source
 
+Clone the official repository:
+
 ```bash
 git clone https://github.com/MeraniBadreddine/StandBy.git
 cd StandBy
+```
+
+Build the debug version:
+
+```bash
 gradle assembleDebug
+```
+
+Build the release version:
+
+```bash
+gradle :app:assembleRelease
 ```
 
 **Debug APK location:**
 
 `app/build/outputs/apk/debug/app-debug.apk`
 
-To build the release version:
-
-```bash
-gradle :app:assembleRelease
-```
-
-**Release APK location:**
+**Signed Release APK location:**
 
 `app/build/outputs/apk/release/app-release.apk`
 
-Release builds require the dedicated StandBy signing key.
+Release builds require the dedicated StandBy signing key and corresponding local signing configuration. Never publish or commit the private keystore or its passwords.
 
 ---
 
@@ -143,11 +206,32 @@ Release builds require the dedicated StandBy signing key.
 | :--- | :--- |
 | **Version** | 4.0.2 |
 | **Version Code** | 41 |
+| **Application ID** | `com.standby.phone` |
+| **Namespace** | `com.standby.tv` |
 | **Minimum Android** | Android 7.0 (API Level 24) |
 | **Compile SDK** | API Level 35 |
 | **Target SDK** | API Level 35 |
 | **Java Compatibility** | Java 11 |
+| **Build System** | Gradle |
+| **Rendering Layer** | HTML / SVG |
+| **Native Integration** | Android Java APIs |
 | **Dependencies** | No third-party libraries |
+
+---
+
+## Quality and Verification
+
+The v4.0.2 release has successfully passed:
+
+- Android Gradle release build.
+- APK signature verification using APK Signature Scheme v2.
+- Release certificate verification.
+- Source project compilation.
+- Dedicated StandBy signing-key configuration.
+
+**Release signing identity:** Dedicated StandBy RSA 2048-bit key.
+
+*Note: v4.0.2 uses a new signing identity. Existing installations signed with a different key must be uninstalled before installing this release.*
 
 ---
 
@@ -155,7 +239,7 @@ Release builds require the dedicated StandBy signing key.
 
 ### Less interface. More atmosphere.
 
-**StandBy · Phone Edition · Version 4.0.2**
+**StandBy · Android Phone Edition · Version 4.0.2**
 
 <sub>An independent open-source project. Not affiliated with or endorsed by Apple Inc.</sub>
 
