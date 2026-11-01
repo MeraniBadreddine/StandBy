@@ -1,0 +1,42 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.standby.tv'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.standby.phone'
+        minSdk 24
+        targetSdk 35
+        versionCode 41
+        versionName '4.0.2'
+    }
+
+    signingConfigs {
+        release {
+            storeFile file('C:/Users/DELL/AndroidSigning/standby-release.jks')
+            storePassword System.getenv('STANDBY_STORE_PASSWORD')
+            keyAlias 'standby'
+            keyPassword System.getenv('STANDBY_KEY_PASSWORD')
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+}
+
+dependencies {
+    // No external dependencies — pure platform APIs only
+}
